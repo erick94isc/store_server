@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+bower_components
+# front
+.sass-cache
+dist
+# temps
+.tmp
+# IDE stuff
+nbproject
+.idea
+# jasmine examples
+spec/helpers/jasmine_examples
+spec/jasmine_examples
+lib
+# logs
+*.log*
+# yeoman tests
+test
+# npm debug logs
+npm-debug-log.*
+# build
+build
+controllers/tareas.pdf
+controllers/pdf-template/tabla.js
+
+latest.dump
+controllers/receipt.pdf

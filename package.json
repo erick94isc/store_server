@@ -1,0 +1,27 @@
+{
+  "name": "generic_server",
+  "version": "1.0.0",
+  "description": "Generic server for an api",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ondecode",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.3",
+    "firebase-admin": "^5.0.0",
+    "firebase-key": "^1.0.6",
+    "moment": "^2.18.1",
+    "pg": "^7.4.1",
+    "sequelize": "^4.30.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.15.1"
+  }
+}

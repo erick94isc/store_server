@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "admin",
+    "database": "cool_database",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "define": {
+      "timestamps": true
+    }
+  },
+  "test": {
+    "username": "postgres",
+    "password": "admin",
+    "database": "cool_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "define": {
+      "timestamps": true
+    }
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "define": {
+      "timestamps": true
+    }
+  }
+}
