@@ -2,7 +2,7 @@
   "development": {
     "username": "postgres",
     "password": "admin",
-    "database": "cool_database",
+    "database": "medmax_database",
     "host": "127.0.0.1",
     "dialect": "postgres",
     "define": {
