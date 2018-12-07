@@ -1,13 +1,11 @@
-'use strict'
 
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const utils = require('../utils/utils')
-const Patient = require('../models').Patient
-const Doctor = require('../models').Doctor
-const Appointment = require('../models').Appointment
-const models = require('../models')
+const User = require('../models').User
 
-const DOCTOR_ERROR = {
+
+const USER_ERROR = {
   ERROR: {
     status: 500,
     message: 'Something Went Wrong'
@@ -22,10 +20,10 @@ const DOCTOR_ERROR = {
     message: 'Auth Failed',
     code: 'AUTH_FAILED'
   },
-  DOCTOR_NOT_FOUND: {
+  USER_NOT_FOUND: {
     status: 404,
-    message: 'Doctor not Found',
-    code: 'DOCTOR_NOT_FOUND'
+    message: 'USER not Found',
+    code: 'USER_NOT_FOUND'
   },
   APPOINTMENT_NOT_FOUND: {
     status: 404,
@@ -37,7 +35,7 @@ const DOCTOR_ERROR = {
   },
   DUPLICATE: {
     status: 403,
-    message: 'The doctor already has an account'
+    message: 'The USER already has an account'
   },
   CODE_INVALID: {
     status: 403,
@@ -57,13 +55,13 @@ const DOCTOR_ERROR = {
     status: 401,
     message: 'Unauthorized'
   },
-  DOCTOR_REGISTERED: {
+  USER_REGISTERED: {
     status: 403,
-    message: 'Doctor already has registered'
+    message: 'USER already has registered'
   }
 }
 
-function DoctorError(error) {
+function USERError(error) {
   const { status, message } = error
   this.status = status
   this.message = message
@@ -75,37 +73,30 @@ module.exports = {
     register: async function (req, res){
         try{
             console.log('body', req.body)
-            const { email, password, firstName, lastName1, lastName2, telephone, cellphone, address, department, from, to, rest_from, rest_to, isAdmin} = req.body
+            const { email, password, firstName, lastName, telephone, cellphone, address} = req.body
             if (!utils.validateEmail(email)) {
                 // Email is invalid
-                throw new DoctorError(DOCTOR_ERROR.INVALID_EMAIL)
+                throw new USERError(USER_ERROR.INVALID_EMAIL)
             }
-            const doctor = await Doctor.findOne({ where: { email } })
-            if (doctor) {
+            const Usertmp = await User.findOne({ where: { email } })
+            if (Usertmp) {
                 // Email has already been used
-                throw new DoctorError(DOCTOR_ERROR.DUPLICATE)
+                throw new USERError(USER_ERROR.DUPLICATE)
               }
               const passwordDigest = await bcrypt.hash(password, 5)  
-              const response = await Doctor.create({
+              const response = await User.create({
                 email,
                 password: passwordDigest,
                 firstName: firstName || '',
-                lastName1: lastName1 || null,
-                lastName2: lastName2 || null,
+                lastName: lastName || null,
                 telephone: telephone,
                 cellphone: cellphone,
-                address: address,
-                department,
-                from,
-                to,
-                rest_from,
-                rest_to,
-                isAdmin
+                address: address,            
               })
               console.log('response',response.status)
               res.status(200).send({message:'it was ok'})
             }catch (error) {
-            if (error instanceof DoctorError) {
+            if (error instanceof USERError) {
               res.status(error.status).send(error)
             }
             console.error(error)
@@ -113,31 +104,45 @@ module.exports = {
           }
         },
 
-    login: async function (res,req){
+    login: async function (req,res){
         try {
             console.log(req)
             const { email, password } = req.body
       
-            const user = await Doctor.scope('withPassword').findOne({
+            const user = await User.scope('withPassword').findOne({
               where: { email }
             })
             if (!user) {
          
-              throw new DoctortError(DOCTOR_ERROR.DOCTOR_NOT_FOUND)
+              throw new USERError(USER_ERROR.USER_NOT_FOUND)
             }
 
             const { password: userPass } = user
             if (bcrypt.compareSync(password, userPass)) {
-               
-                res.status(200).send({message:'Auth succesfully'})
+              const payload = {
+                email: user.email,
+                name: user.firstName,
+                lastName: user.lastName, 
+                id: user.id_user,
+                time: new Date()
+            }
+            var token = jwt.sign(payload, 'holasoyLlave', {
+              expiresIn: '24h'
+            });
+        
+                res.status(200).send({message:'Auth succesfully', data: { token }})
             }    
+           
+
+
+       
             else {
                 // User exists but the password is incorrect
-                throw new DoctorError(DOCTOR_ERROR.AUTH_FAILED)
+                throw new USERError(USER_ERROR.AUTH_FAILED)
               }
        } catch (error) {
         console.error(error)
-        if (error instanceof DoctorError) {
+        if (error instanceof USERError) {
           res.status(error.status).send(error)
         } else {
           res.status(500).send({ message: 'Something Went Wrong' })
@@ -148,42 +153,34 @@ module.exports = {
     updateProfile: async function (req, res) {
         try {
             const { id } = req.user
-            const { email, firstName, lastName1, lastName2, telephone, cellphone, address, department, from, to, rest_from, rest_to, isAdmin, no} = req.body
-            const doctor = await Doctor.scope('withPassword').find({
+            const { email, firstName, lastName, telephone, cellphone, address} = req.body
+            const Usertmp = await User.scope('withPassword').find({
                 where: { id }
               })
-            if (doctor) {
+            if (Usertmp) {
                 // Email has already been used
-                throw new DoctorError(DOCTOR_ERROR.DUPLICATE)
+                throw new USERError(USER_ERROR.DUPLICATE)
             }
             if (!utils.validateEmail(email)) {
                 // Email is invalid
-                throw new DoctorError(DOCTOR_ERROR.INVALID_EMAIL)
+                throw new USERError(USER_ERROR.INVALID_EMAIL)
             }
 
             const updates = {
                 email,
-                firstName: firstName || doctor.firstName,
-                lastName1: lastName1 || doctor.lastName1,
-                lastName2: lastName2 || doctor.lastName2,
-                telephone: telephone || doctor.telephone,
-                cellphone: cellphone || doctor.cellphone,
-                address: address || doctor.address,
-                department: department ||  doctor.department,
-                from: from || doctor.from,
-                to: to || doctor.to,
-                rest_from: rest_from || doctor.rest_from,
-                rest_to: rest_to || doctor.rest_to,
-                isAdmin: isAdmin || doctor.isAdmin,
-                no: no || doctor.isAdmin
+                firstName: firstName || Usertmp .firstName,
+                lastName: lastName1 || Usertmp.lastName1,
+                telephone: telephone || Usertmp.telephone,
+                cellphone: cellphone || Usertmp.cellphone,
+                address: address || Usertmp.address
             }
 
-            const response = await doctor.update(updates)
+            const response = await User.update(updates)
             res.status(200).send({ message: 'Profile Updated', response})
 
        
         }catch (error) {
-            if (error instanceof DoctorError) {
+            if (error instanceof USERError) {
               res.status(error.status).send(error)
             }
             console.error(error)
@@ -192,39 +189,56 @@ module.exports = {
     },
 
 
-    getCurrentDoctor: async function (req, res) {
+    getCurrentUser: async function (req, res) {
         try {
-          const id = req.user
-          const doctor = await Doctor.findOne({
+          const {id} = req.body
+          const Usertmp = await User.findOne({
             where: { id: id }
           })
-          if (doctor) {
+          if (Usertmp) {
             res.status(200).send({
-              doctor
+              Usertmp
             })
           } else {
-            throw new DoctorError(DOCTOR_ERROR.DOCTOR_NOT_FOUND)
+            throw new USERError(USER_ERROR.USER_NOT_FOUND)
           }
         } catch (e) {
           console.error(e)
-          if (e instanceof DoctorError) {
+          if (e instanceof USERError) {
             res.status(e.status).send(e)
           } else {
             res.status(500).send({ message: 'Something Went Wrong' })
           }
         }
       },
+       
+      getUser: async function (req, res){
+       
+        let token2 = req.headers['authorization']
+        token2 = token2.split(' ')
+        const token = token2[1]
+        console.log(token)
+        if (!token) return res.status(400).json({type: 'error', message: 'x-access-token header not found.'})
+        jwt.verify(token, 'holasoyLlave', (error, result) => {
+          if (error) return res.status(403).json({type: 'error', message: 'Provided token is invalid.', error})
+          return res.json({
+            type: 'success',
+            message: 'Provided token is valid.',
+            data: result
+          })
+        })
+      },
 
-      getDoctors: async function (req,res){
+      getUSERs: async function (req,res){
           try{
               
-            const doctors = await Doctor.findAll()
-            if (doctors){
+            const USERs = await USER.findAll()
+            if (USERs){
                 res.status(200).send({
-                    doctors
+                    USERs
                 })
             } else{
-                throw new DoctortError(DOCTOR_ERROR.DOCTOR_NOT_FOUND)
+                throw new USERtError(USER_ERROR.USER_NOT_FOUND)
             }
 
           }
@@ -233,7 +247,7 @@ module.exports = {
                 if (error instanceof DoctError) {
                   res.status(error.status).send(error)
                 } else {
-                  res.status(500).send({ ...DOCTOR_ERROR.ERROR, doctor })
+                  res.status(500).send({ ...USER_ERROR.ERROR, USER })
             }
               
           }

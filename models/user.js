@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Patient = sequelize.define('Patient', {
-    id_patient: {
+  var User = sequelize.define('User', {
+    id: {
       allowNull: false,
       primaryKey: true,
       type: DataTypes.UUID,
@@ -20,15 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    lastName1: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    lastName2: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    telephone: {
+    lastName: {
       type: DataTypes.STRING,
       allowNull: true
     },
@@ -39,12 +31,8 @@ module.exports = (sequelize, DataTypes) => {
     address: {
       type: DataTypes.STRING,
       allowNull: true
-    },
-    blood_type: {
-      type: DataTypes.STRING,
-      defaultValue: false
-    },
-  }, {
+    }
+   }, {
     defaultScope: {
       attributes: {exclude: ['createdAt', 'updatedAt', 'deletedAt']},
     },
@@ -53,15 +41,15 @@ module.exports = (sequelize, DataTypes) => {
         attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt']}
       },
       withoutData: {
-        attributes: ['id_patient', 'email']
+        attributes: ['id']
       }
     },
     paranoid: true
   });
-  Patient.associate = function(models) {
+  User.associate = function(models) {
     // associations can be defined here
-    Patient.hasMany(models.Appointment)
+    User.belongsToMany(models.Products, {through: models.UserProducts});
    
   };
-  return Patient;
+  return User;
 };
