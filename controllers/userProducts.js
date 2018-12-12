@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const utils = require('../utils/utils')
 const UserProducts = require('../models').UserProducts
 const Products = require('../models').Products
+const User = require('../models').User
 const models = require('../models')
 
 const PRODUCT_ERROR = {
@@ -127,15 +128,22 @@ const PRODUCT_ERROR = {
           try{
           const { id_user } = req.body
           const Car = await UserProducts.findAll({
-            where:{ UserId: id_user},
-            include: {
-              model: Products
-            }
+            where:{ UserId: id_user}
           })
-
+          let shoppingCar = []
           if (Car) {
+            const car = JSON.parse(JSON.stringify(Car))
+            for(let userProduct of car) {
+              const { quantity, ProductId } = userProduct
+              const product = await Products.findOne({
+                where: {
+                  id: ProductId
+                }
+              })
+              shoppingCar.push({product: { ...product.toJSON() }, quantity})
+            }
             res.status(200).send({
-               Car
+               car: shoppingCar
             })
           } else {
             throw new PRODUCTError(PRODUCT_ERROR.PRODUCT_NOT_FOUND)
@@ -149,8 +157,4 @@ const PRODUCT_ERROR = {
           }
         }
         }
-    
-       
-  
-     
-  }    
+      }    
