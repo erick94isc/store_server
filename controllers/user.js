@@ -106,7 +106,7 @@ module.exports = {
 
     login: async function (req,res){
         try {
-            console.log(req)
+            
             const { email, password } = req.body
       
             const user = await User.scope('withPassword').findOne({

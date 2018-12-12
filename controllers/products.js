@@ -73,14 +73,15 @@ const PRODUCT_ERROR = {
       new: async function (req, res){
           try{
               console.log('body', req.body)
-              const { title, description, price, image, quantity} = req.body
+              const { title, description, price, image, quantity, tpye} = req.body
              
                 const response = await Products.create({
                   title,
                   description,
                   price,
                   image,
-                  quantity
+                  quantity,
+                  tpye
                 })
                 console.log('response',response.status)
                 res.status(200).send({message:'it was ok'})
@@ -120,8 +121,8 @@ const PRODUCT_ERROR = {
   
         getProducts: async function (req,res){
             try{
-                
-              const ProductsAll = await Products.findAll()
+              const { type } = req.params;
+              const ProductsAll = await Products.findAll({ where: {tpye:type}})
               if (ProductsAll){
                   res.status(200).send({
                       ProductsAll

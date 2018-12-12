@@ -7,7 +7,7 @@ const products = require('../controllers/products')
 router.route('/new')
   .post(products.new)
 
-router.route('/product')
+router.route('/product/:type')
   .get(products.getProducts)
 
 router.route('/patient')

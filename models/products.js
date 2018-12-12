@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    tpye:{
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {
     defaultScope: {

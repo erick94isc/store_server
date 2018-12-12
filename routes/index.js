@@ -9,7 +9,7 @@ module.exports = function (app) {
 
   app.use('/api/user', user),
   app.use('/api/products', products),
-  app.use('/api/products', userProducts)
+  app.use('/api/userproducts', userProducts)
 
   
   

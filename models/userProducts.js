@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var UserProducts = sequelize.define('UserProducts', {
-    UserUuid: {
+    UserId: {
       type: DataTypes.UUID,
       allowNull: false,
       onDelete: 'CASCADE',
@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
-    ProductUuid: {
+    ProductId: {
       type: DataTypes.UUID,
       allowNull: false,
       onDelete: 'CASCADE',

@@ -2,8 +2,8 @@
 
 const bcrypt = require('bcrypt')
 const utils = require('../utils/utils')
-const Products = require('../models').Products
 const UserProducts = require('../models').UserProducts
+const Products = require('../models').Products
 const models = require('../models')
 
 const PRODUCT_ERROR = {
@@ -72,15 +72,26 @@ const PRODUCT_ERROR = {
   module.exports = {
   
       add: async function (req, res){
-          try{
+          try{ 
+              var response = null
               console.log('body', req.body)
               const { userid, productid, quantity} = req.body
-             
-                const response = await UserProducts.create({
-                    UserUuid: userid,
-                    ProductUuid: productid,
+                const tmpid = await UserProducts.findOne({where:{ProductId: productid}})
+
+                if( tmpid ){
+                  console.log('Entreeeeeeeeeeeee')
+                  const quantity = tmpid.quantity
+                  response = await UserProducts.update(quantity) 
+                  
+                } else {
+                  console.log(productid)
+                 response = await UserProducts.create({
+                    UserId: userid,
+                    ProductId: req.body.productid,
                     quantity
                 })
+              }
+
                 console.log('response',response.status)
                 res.status(200).send({message:'it was ok'})
               }catch (error) {
@@ -110,6 +121,34 @@ const PRODUCT_ERROR = {
             }
           }
         },
+
+
+        getCar: async function (req,res){
+          try{
+          const { id_user } = req.body
+          const Car = await UserProducts.findAll({
+            where:{ UserId: id_user},
+            include: {
+              model: Products
+            }
+          })
+
+          if (Car) {
+            res.status(200).send({
+               Car
+            })
+          } else {
+            throw new PRODUCTError(PRODUCT_ERROR.PRODUCT_NOT_FOUND)
+          }
+        } catch (e) {
+          console.error(e)
+          if (e instanceof PRODUCTError) {
+            res.status(e.status).send(e)
+          } else {
+            res.status(500).send({ message: 'Something Went Wrong' })
+          }
+        }
+        }
     
        
   

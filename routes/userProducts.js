@@ -10,7 +10,8 @@ router.route('/add')
 router.route('/delete')
   .delete(userproducts.delete)
 
-
+  router.route('/getCar')
+  .get(userproducts.getCar)
 
 
 module.exports = router
